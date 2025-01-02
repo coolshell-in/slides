@@ -1,0 +1,40 @@
+#container {
+    display: flex;
+}
+
+#sidebar {
+    background-color: #f0f0f0;
+    padding: 10px;
+    font-family: 'Open Sans', sans-serif;
+    /* Dynamically adjust width based on content */
+    width: fit-content;  /* Shrink-wrap to content */
+    padding-right: 20px; /* Add some padding to the right */
+}
+
+#sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#sidebar li {
+    margin-bottom: 5px;
+}
+
+#sidebar a {
+    text-decoration: none;
+    color: #656668; 
+    display: block; /* Make links fill the width of the list item */
+}
+
+#content {
+    flex-grow: 1;
+    padding: 20px;
+}
+
+/* Example styling for <p> tags within the content area */
+#content p {
+    font-size: 1.2em; /* Example: Larger font size */
+    color: #656668;   /* Example: Dark blue color */
+    font-family: 'Open Sans', sans-serif; /* Example: Different font */
+}
