@@ -6,9 +6,8 @@
     background-color: #f0f0f0;
     padding: 10px;
     font-family: 'Open Sans', sans-serif;
-    /* Dynamically adjust width based on content */
-    width: fit-content;  /* Shrink-wrap to content */
-    padding-right: 20px; /* Add some padding to the right */
+    width: fit-content;
+    padding-right: 20px;
 }
 
 #sidebar ul {
@@ -23,8 +22,16 @@
 
 #sidebar a {
     text-decoration: none;
-    color: #656668; 
-    display: block; /* Make links fill the width of the list item */
+    color: #656668;
+    display: block;
+}
+
+/* Highlight the active link */
+#sidebar a.active {
+    background-color: #919193; /* Example: Dark blue */
+    color: white;             /* Example: White text */
+    padding: 2px 5px;  /* Add some padding for better visibility */
+    border-radius: 3px; /* Rounded corners */
 }
 
 #content {
@@ -32,9 +39,8 @@
     padding: 20px;
 }
 
-/* Example styling for <p> tags within the content area */
 #content p {
-    font-size: 1.2em; /* Example: Larger font size */
-    color: #656668;   /* Example: Dark blue color */
-    font-family: 'Open Sans', sans-serif; /* Example: Different font */
+    font-size: 1.2em;
+    color: #656668;
+    font-family: 'Open Sans', sans-serif;
 }

@@ -11,17 +11,15 @@
     <div id="container">
         <nav id="sidebar">
             <ul>
-                <li><a href="#what" onclick="loadContent('what.html')">What</a></li>
-                <li><a href="#where" onclick="loadContent('where.html')">Where</a></li>
-                <li><a href="#why" onclick="loadContent('why.html')">Why</a></li>
-                <li><a href="#when" onclick="loadContent('when.html')">When</a></li>
-                <li><a href="#who" onclick="loadContent('who.html')">Who</a></li>
-                <li><a href="#whom" onclick="loadContent('whom.html')">Whom</a></li>
-                <li><a href="#which" onclick="loadContent('which.html')">Which</a></li>
-                <li><a href="#how" onclick="loadContent('how.html')">How</a></li>
-                <li><a href="#note" onclick="loadContent('note.html')">Note</a></li>
-
-
+                <li><a href="#what" onclick="loadContent('what.html')" id="what-link">What</a></li>
+                <li><a href="#where" onclick="loadContent('where.html')" id="where-link">Where</a></li>
+                <li><a href="#why" onclick="loadContent('why.html')" id="why-link">Why</a></li>
+                <li><a href="#when" onclick="loadContent('when.html')" id="when-link">When</a></li>
+                <li><a href="#who" onclick="loadContent('who.html')" id="who-link">Who</a></li>
+                <li><a href="#whom" onclick="loadContent('whom.html')" id="whom-link">Whom</a></li>
+                <li><a href="#which" onclick="loadContent('which.html')" id="which-link">Which</a></li>
+                <li><a href="#how" onclick="loadContent('how.html')" id="how-link">How</a></li>
+                <li><a href="#note" onclick="loadContent('note.html')" id="note-link">Note</a></li>
             </ul>
         </nav>
         <div id="content">
@@ -29,24 +27,48 @@
     </div>
     <script>
         function loadContent(url) {
-            // Store the URL in the browser history so that the back/forward buttons work
-            window.history.pushState({url: url}, "", "#" + url.split('.')[0]); // Use #fragment for compatibility
+            window.history.pushState({url: url}, "", "#" + url.split('.')[0]);
 
             fetch(url)
                 .then(response => response.text())
                 .then(html => {
                     document.getElementById('content').innerHTML = html;
+                    highlightActiveLink();
                 });
         }
 
-        // Handle back/forward button clicks
+        function highlightActiveLink() {
+            const links = document.querySelectorAll('#sidebar a');
+            links.forEach(link => link.classList.remove('active'));
+
+            const currentUrl = window.location.hash;
+            const activeLink = document.querySelector(`#sidebar a[href="${currentUrl}"]`);
+            if (activeLink) {
+                activeLink.classList.add('active');
+            }
+        }
+
         window.addEventListener('popstate', (event) => {
             if (event.state && event.state.url) {
                 loadContent(event.state.url);
             }
         });
 
-        // Load initial content (e.g., s1.html)
+        // Keyboard navigation
+        document.addEventListener('keydown', (event) => {
+            const links = Array.from(document.querySelectorAll('#sidebar a'));
+            const currentLink = document.querySelector('#sidebar a.active');
+            let currentIndex = currentLink ? links.indexOf(currentLink) : 0;
+
+            if (event.key === 'ArrowUp' && currentIndex > 0) {
+                loadContent(links[currentIndex - 1].getAttribute('onclick').split("'")[1]);
+                event.preventDefault(); // Prevent page scrolling
+            } else if (event.key === 'ArrowDown' && currentIndex < links.length - 1) {
+                loadContent(links[currentIndex + 1].getAttribute('onclick').split("'")[1]);
+                event.preventDefault(); // Prevent page scrolling
+            }
+        });
+
         loadContent('what.html');
     </script>
 </body>
