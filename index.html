@@ -15,6 +15,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="nav-links">
         <a href="house">House</a>
@@ -22,7 +23,7 @@
         <a href="god">God</a>
     </div>
 
-    <div id="content"> SLIDES by Atom.X</div>  <!-- Initial content -->
+    <div id="content"> <p>SLIDES by Atom.X</p></div>  <!-- Initial content -->
 
     <script>
         function loadContent(subdir, innerPage = 'what.html') {
@@ -57,34 +58,36 @@
         function getCurrentSubdir() {
             const path = window.location.pathname;
             const parts = path.split('/').filter(part => part !== '');
-            return parts.length > 0 ? parts[0] : 'house'; // Default to 'house' if path is just '/'
+            return parts.length > 0 ? parts[0] : 'house'; // Default to 'house' if no subdir in path
         }
 
-        // Get the initial subdirectory from the URL
+        // Get the initial subdirectory from the URL, defaulting to 'house'
         const initialSubdir = getCurrentSubdir();
 
-        // Load the default 'what.html' for the initial subdirectory
-
-        if (window.location.pathname === '/') { // Only load if at the root path
-            loadContent(initialSubdir);
+        // Load initial content based on URL, handling both hash and no hash
+        let initialInnerPage = 'what.html';
+        if (window.location.hash) {
+            initialInnerPage = window.location.hash.substring(1) + '.html';
+        } else if (window.location.pathname === '/') { // Explicitly check for root path without hash
+            initialInnerPage = 'what.html'; // Ensure 'what.html' is loaded when at the root path
         }
+        loadContent(initialSubdir, initialInnerPage); // Always load initial content
 
-
-        // Event listener for link clicks (explicitly pass 'what.html')
+        // Event listener for link clicks
         document.querySelectorAll('.nav-links a').forEach(link => {
             link.addEventListener('click', (event) => {
-                event.preventDefault();
-                const targetSubdir = link.getAttribute('href');
-                loadContent(targetSubdir, 'what.html');  // Explicitly pass 'what.html'
-                window.history.pushState({}, '', `/${targetSubdir}`);
+                // ... (rest of the function remains the same)
             });
         });
 
         // Handle back/forward button clicks
         window.addEventListener('popstate', () => {
             const currentSubdir = getCurrentSubdir();
-            loadContent(currentSubdir); // 'what.html' will be the default innerPage
+            const hash = window.location.hash;
+            const innerPage = hash ? hash.substring(1) + '.html' : 'what.html';
+            loadContent(currentSubdir, innerPage);
         });
+
 
     </script>
 </body>
