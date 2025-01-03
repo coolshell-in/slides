@@ -21,11 +21,8 @@
         <a href="study">Study</a>
         <a href="god">God</a>
     </div>
-    <div id="content">
-        <p> slides for multiple contents </p>
 
-        <p> Atom.X</p>
-    </div>  <!-- Content div remains empty initially -->
+    <div id="content"> SLIDES by Atom.X</div>  <!-- Initial content -->
 
     <script>
         function loadContent(subdir, innerPage = 'what.html') {
@@ -44,28 +41,49 @@
                         newScript.textContent = script.textContent;
                         document.getElementById('content').appendChild(newScript);
                     });
+
+                    // Update URL after content loads (important for refresh to work)
+                    window.history.pushState({}, '', `/${subdir}`); // For initial load and subdir navigation
+                    if (innerPage !== 'what.html') { // Add hash for inner pages
+                        window.history.pushState({}, '', `/${subdir}#${innerPage.replace('.html', '')}`);
+                    }
                 })
                 .catch(error => {
+                    console.error("Error loading content:", error); // Log the error for debugging
                     document.getElementById('content').innerHTML = 'Content not available';
                 });
         }
 
+        function getCurrentSubdir() {
+            const path = window.location.pathname;
+            const parts = path.split('/').filter(part => part !== '');
+            return parts.length > 0 ? parts[0] : 'house'; // Default to 'house' if path is just '/'
+        }
 
-        // Event listener for link clicks
+        // Get the initial subdirectory from the URL
+        const initialSubdir = getCurrentSubdir();
+
+        // Load the default 'what.html' for the initial subdirectory
+
+        if (window.location.pathname === '/') { // Only load if at the root path
+            loadContent(initialSubdir);
+        }
+
+
+        // Event listener for link clicks (explicitly pass 'what.html')
         document.querySelectorAll('.nav-links a').forEach(link => {
             link.addEventListener('click', (event) => {
                 event.preventDefault();
                 const targetSubdir = link.getAttribute('href');
-                loadContent(targetSubdir);  // Load content only on click
+                loadContent(targetSubdir, 'what.html');  // Explicitly pass 'what.html'
                 window.history.pushState({}, '', `/${targetSubdir}`);
             });
         });
 
-        // Handle back/forward button clicks (loads content based on URL)
+        // Handle back/forward button clicks
         window.addEventListener('popstate', () => {
-            const path = window.location.pathname;
-            const subdir = path.substring(1) || 'house'; // Extract subdir or default
-            loadContent(subdir);
+            const currentSubdir = getCurrentSubdir();
+            loadContent(currentSubdir); // 'what.html' will be the default innerPage
         });
 
     </script>
