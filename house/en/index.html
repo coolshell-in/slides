@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>House management</title>
+    <link rel="stylesheet" href="../../styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="container">
+        <nav id="sidebar">
+            <ul>
+                <li><a href="#what" onclick="loadContent('what.html')" id="what-link">What</a></li>
+                <li><a href="#where" onclick="loadContent('where.html')" id="where-link">Where</a></li>
+                <li><a href="#why" onclick="loadContent('why.html')" id="why-link">Why</a></li>
+                <li><a href="#when" onclick="loadContent('when.html')" id="when-link">When</a></li>
+                <li><a href="#who" onclick="loadContent('who.html')" id="who-link">Who</a></li>
+                <li><a href="#whom" onclick="loadContent('whom.html')" id="whom-link">Whom</a></li>
+                <li><a href="#which" onclick="loadContent('which.html')" id="which-link">Which</a></li>
+                <li><a href="#how" onclick="loadContent('how.html')" id="how-link">How</a></li>
+                <li><a href="#note" onclick="loadContent('note.html')" id="note-link">Note</a></li>
+            </ul>
+        </nav>
+        <div id="content">
+        </div>
+    </div>
+    <script>
+        function loadContent(url) {
+            window.history.pushState({url: url}, "", "#" + url.split('.')[0]);
+
+            fetch(url)
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('content').innerHTML = html;
+                    highlightActiveLink();
+                });
+        }
+
+        function highlightActiveLink() {
+            const links = document.querySelectorAll('#sidebar a');
+            links.forEach(link => link.classList.remove('active'));
+
+            const currentUrl = window.location.hash;
+            const activeLink = document.querySelector(`#sidebar a[href="${currentUrl}"]`);
+            if (activeLink) {
+                activeLink.classList.add('active');
+            }
+        }
+
+        window.addEventListener('popstate', (event) => {
+            if (event.state && event.state.url) {
+                loadContent(event.state.url);
+            }
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (event) => {
+            const links = Array.from(document.querySelectorAll('#sidebar a'));
+            const currentLink = document.querySelector('#sidebar a.active');
+            let currentIndex = currentLink ? links.indexOf(currentLink) : 0;
+
+            if (event.key === 'ArrowUp' && currentIndex > 0) {
+                loadContent(links[currentIndex - 1].getAttribute('onclick').split("'")[1]);
+                event.preventDefault(); // Prevent page scrolling
+            } else if (event.key === 'ArrowDown' && currentIndex < links.length - 1) {
+                loadContent(links[currentIndex + 1].getAttribute('onclick').split("'")[1]);
+                event.preventDefault(); // Prevent page scrolling
+            }
+        });
+
+        loadContent('what.html');
+    </script>
+</body>
+</html>
+
+<!--
+What 主题，定义，是什么
+
+When 时间，周期，历史
+
+Where 地点
+
+Who 人- 组织者，团队，主体，
+
+Whom 人- 参与者，受众，客体，对象
+
+Why 为什么
+
+Which 具体要素，有什么
+
+How 怎么样
+
+-->
