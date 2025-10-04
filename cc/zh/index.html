@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>众创社区</title>
+    <link rel="stylesheet" href="../../styles.css">
+    <!-- Assuming styles.css or internal styles handle basic layout -->
+    <style>
+        /* Basic styles for sidebar and content if styles.css doesn't cover them */
+        body {
+            font-family: 'Open Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex; /* Use Flexbox for layout */
+            height: 100vh; /* Full viewport height */
+        }
+        
+        #container {
+            display: flex;
+            width: 100%;
+            height: 100%; /* Inherit full height */
+        }
+
+        #sidebar {
+            width: 200px; /* Adjust sidebar width as needed */
+            background-color: #f4f4f4;
+            padding: 15px;
+            border-right: 1px solid #ddd;
+            overflow-y: auto; /* Allow scrolling if menu is long */
+        }
+
+        #sidebar ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #sidebar li {
+            margin-bottom: 10px;
+        }
+
+        #sidebar a {
+            text-decoration: none;
+            color: #333;
+            display: block;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        /* --- NEW: Specific style for the Home link --- */
+        #home-link {
+            background-color: #e0e0e0; /*淡灰色背景 */
+        }
+
+        #sidebar a:hover {
+            background-color: #e9e9e9;
+        }
+
+        #sidebar a.active {
+            background-color: #007bff;
+            color: white;
+        }
+
+        #content {
+            flex-grow: 1; /* Take up remaining space */
+            padding: 20px;
+            overflow-y: auto; /* Allow scrolling for content */
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="container">
+        <nav id="sidebar">
+            <ul>
+                <!-- Home link now correctly points to the ROOT of the application -->
+                <li><a href="/" id="home-link">Home</a></li>
+                
+                <li><a href="#what" onclick="loadContent('what.html')" id="what-link">What</a></li>
+                <li><a href="#why" onclick="loadContent('why.html')" id="why-link">Why</a></li>
+
+                <li><a href="#which" onclick="loadContent('which.html')" id="which-link">Which</a></li>
+                <li><a href="#when" onclick="loadContent('when.html')" id="when-link">When</a></li>
+                <li><a href="#where" onclick="loadContent('where.html')" id="where-link">Where</a></li>
+                <li><a href="#who" onclick="loadContent('who.html')" id="who-link">Who</a></li>
+                <li><a href="#whom" onclick="loadContent('whom.html')" id="whom-link">Whom</a></li>
+                <li><a href="#how" onclick="loadContent('how.html')" id="how-link">How</a></li>
+
+                <li><a href="#note" onclick="loadContent('note.html')" id="note-link">Note</a></li>
+            </ul>
+        </nav>
+        <div id="content">
+            <!-- Initial content will be loaded here -->
+        </div>
+    </div>
+    <script>
+        // --- Configuration ---
+        const HOME_CONTENT_URL = 'what.html'; // Define the default/home content URL
+
+        function loadContent(urlOrAction) {
+            let urlToLoad = '';
+            let historyState = {};
+
+            if (urlOrAction === 'home') {
+                // Handle loading home content (though clicking Home link navigates away)
+                urlToLoad = HOME_CONTENT_URL;
+                historyState = { action: 'home', innerPage: HOME_CONTENT_URL };
+                // Update browser history for internal navigation
+                window.history.pushState(historyState, "", window.location.pathname); // e.g., /house
+               
+            } else {
+                // Handle loading other content based on file name
+                urlToLoad = urlOrAction;
+                historyState = { innerPage: urlOrAction };
+                const hashToSet = '#' + urlOrAction.split('.')[0];
+                // Update browser history for internal navigation
+                window.history.pushState(historyState, "", hashToSet); // e.g., /house#where
+            }
+
+
+            fetch(urlToLoad)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status} for ${urlToLoad}`);
+                    }
+                    return response.text();
+                })
+                .then(html => {
+                    document.getElementById('content').innerHTML = html;
+                    highlightActiveLink(urlOrAction); // Pass the action to correctly identify active link
+                })
+                .catch(error => {
+                     console.error('Error fetching content:', error);
+                     document.getElementById('content').innerHTML = `<p>Error loading content from ${urlToLoad}. Please check the file exists.</p>`;
+                     highlightActiveLink(null); // Clear active state on error if desired
+                });
+        }
+
+        function highlightActiveLink(currentActionOrUrl) {
+            // Remove active class from all links
+            const links = document.querySelectorAll('#sidebar a');
+            links.forEach(link => link.classList.remove('active'));
+
+            let activeLinkId = null;
+
+            if (currentActionOrUrl === 'home') {
+                // Highlight the Home link if 'home' action is somehow used internally
+                activeLinkId = 'home-link';
+            } else if (currentActionOrUrl) {
+                 // Determine active link ID based on the URL/file name passed
+                 const fileNameWithoutExt = currentActionOrUrl.split('.')[0]; 
+                 activeLinkId = `${fileNameWithoutExt}-link`;
+            } else {
+                 // Fallback logic based on hash (useful on direct page load with hash)
+                 const currentHash = window.location.hash.substring(1); // Remove '#'
+                 if (currentHash) {
+                      activeLinkId = `${currentHash}-link`;
+                 } else {
+                      // If no hash, assume home content is active (initial load)
+                      const fileNameWithoutExt = HOME_CONTENT_URL.split('.')[0];
+                      activeLinkId = `${fileNameWithoutExt}-link`;
+                 }
+            }
+
+            const activeLink = document.getElementById(activeLinkId);
+            if (activeLink) {
+                activeLink.classList.add('active');
+            }
+        }
+
+         // Handle browser back/forward buttons within the house module
+        window.addEventListener('popstate', (event) => {
+             console.log("House Popstate event:", event); // For debugging
+             if (event.state && event.state.action === 'home') {
+                  loadContent('home');
+             } else if (event.state && event.state.innerPage) {
+                   loadContent(event.state.innerPage);
+             } else if (!event.state && window.location.hash === '') {
+                  // User navigated back to the module root path
+                  loadContent('home'); 
+             } else if(window.location.hash) {
+                 // Fallback if state lost but hash present
+                 const hashValue = window.location.hash.substring(1);
+                 loadContent(`${hashValue}.html`);
+             } else {
+                  // Default fallback
+                  loadContent('home');
+             }
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (event) => {
+            const links = Array.from(document.querySelectorAll('#sidebar a'));
+            
+            // Find currently active link index
+            let currentIndex = -1;
+            for(let i=0; i<links.length; i++) {
+                 if (links[i].classList.contains('active')) {
+                       currentIndex = i;
+                       break;
+                 }
+            }
+            
+            // If no active link found by class, try using hash
+            if (currentIndex === -1) {
+               const hash = window.location.hash.substring(1);
+               if (!hash) { // No hash likely means home content is active
+                    // Find index of the link corresponding to HOME_CONTENT_URL
+                    const homeFileName = HOME_CONTENT_URL.split('.')[0];
+                    const homeLinkId = `${homeFileName}-link`;
+                    const homeLinkElement = document.getElementById(homeLinkId);
+                    if(homeLinkElement) {
+                        currentIndex = links.indexOf(homeLinkElement);
+                    } else {
+                        currentIndex = 0; // Default to first item (Home link) if home file link not found
+                    }
+               } else {
+                    const activeIdFromHash = `${hash}-link`;
+                    const elem = document.getElementById(activeIdFromHash);
+                    if (elem) {
+                         currentIndex = links.indexOf(elem);
+                    }
+               }
+            }
+            
+            // Default to first item (Home) if still unsure
+            if (currentIndex === -1) currentIndex = 0;
+
+
+            if ((event.key === 'ArrowUp' || event.key === 'k') && currentIndex > 0) {
+                const targetLink = links[currentIndex - 1];
+                const onclickAttr = targetLink.getAttribute('onclick');
+                if (onclickAttr) {
+                     const match = onclickAttr.match(/loadContent\(['"]([^'"]+)['"]\)/);
+                     if (match && match[1]) {
+                          loadContent(match[1]);
+                     }
+                }
+                event.preventDefault(); // Prevent page scrolling
+            } else if ((event.key === 'ArrowDown' || event.key === 'j') && currentIndex < links.length - 1) {
+                const targetLink = links[currentIndex + 1];
+                const onclickAttr = targetLink.getAttribute('onclick');
+                if (onclickAttr) {
+                     const match = onclickAttr.match(/loadContent\(['"]([^'"]+)['"]\)/);
+                     if (match && match[1]) {
+                          loadContent(match[1]);
+                     }
+                }
+                event.preventDefault(); // Prevent page scrolling
+            }
+        });
+
+        // Function to determine what content to load initially based on URL/hash
+        function loadInitialContent() {
+              console.log("Loading initial House content..."); // For debugging
+              const hash = window.location.hash.substring(1); // Get hash without #
+              
+              if (hash) {
+                   // Try to find a corresponding file
+                   const potentialFileName = `${hash}.html`;
+                   // Check if there's a link for this hash to ensure it's valid
+                   const potentialLinkId = `${hash}-link`;
+                   const linkElement = document.getElementById(potentialLinkId);
+                   
+                   if (linkElement) {
+                        loadContent(potentialFileName);
+                   } else {
+                        console.warn(`No matching link found for hash #${hash}, loading home content.`);
+                        loadContent('home');
+                   }
+              } else {
+                   // No hash, load home content
+                   loadContent('home');
+              }
+        }
+
+       // Load initial content when page loads
+       document.addEventListener('DOMContentLoaded', loadInitialContent);
+
+    </script>
+</body>
+</html>
+
+
+
